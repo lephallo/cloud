@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Income - IWB Recycling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body class="min-h-screen flex flex-col bg-gray-100">
+    <header class="bg-blue-600 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">IWB Recycling</h1>
+            <nav>
+                <a href="{{ url_for('home') }}" class="mr-4">Home</a>
+                <a href="{{ url_for('query') }}" class="mr-4">Query</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </nav>
+        </div>
+    </header>
+    <main class="container mx-auto mt-8 p-4 bg-white rounded-lg shadow-lg">
+        <h2 class="text-2xl font-semibold mb-4">Income Statement</h2>
+        {% if income_statement_img %}
+        <img src="/static/income_statement.png" alt="Income Statement" class="w-full max-w-lg mx-auto">
+        {% else %}
+        <p class="mt-4">Chart unavailable (matplotlib not installed).</p>
+        {% endif %}
+        <table class="w-full border mt-4">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="border p-2">Month</th>
+                    <th class="border p-2">Total Income (M)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in sales_data %}
+                <tr>
+                    <td class="border p-2">{{ data.month }}</td>
+                    <td class="border p-2">{{ data.total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+    <footer class="bg-blue-600 text-white p-4 mt-auto">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2025 IWB Recycling. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

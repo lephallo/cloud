@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query - IWB Recycling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body class="min-h-screen flex flex-col bg-gray-100">
+    <header class="bg-blue-600 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">IWB Recycling</h1>
+            <nav>
+                <ul class="flex space-x-6 text-lg">
+                    <li><a href="/" class="hover:underline flex items-center"><i class="fas fa-home mr-2"></i> Home</a></li>
+                    <li><a href="/products" class="hover:underline flex items-center"><i class="fas fa-box mr-2"></i> Products</a></li>
+                    <li><a href="/query" class="hover:underline flex items-center"><i class="fas fa-question-circle mr-2"></i> Query</a></li>
+                    {% if session.role == 'sales' %}
+                        <li><a href="/sales" class="hover:underline flex items-center"><i class="fas fa-shopping-cart mr-2"></i> Sales</a></li>
+                    {% endif %}
+                    {% if session.role in ['finance', 'investor'] %}
+                        <li><a href="/income" class="hover:underline flex items-center"><i class="fas fa-chart-line mr-2"></i> Income</a></li>
+                    {% endif %}
+                    {% if session.role == 'developer' %}
+                        <li><a href="/developer" class="hover:underline flex items-center"><i class="fas fa-code mr-2"></i> Developer</a></li>
+                    {% endif %}
+                    {% if session.role == 'partner' %}
+                        <li><a href="/partner" class="hover:underline flex items-center"><i class="fas fa-handshake mr-2"></i> Partner</a></li>
+                    {% endif %}
+                    <li><a href="/logout" class="hover:underline flex items-center"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="container mx-auto mt-8 p-4 bg-white rounded-lg shadow-lg">
+        <h2 class="text-2xl font-semibold mb-4">Submit a Query</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-4">
+                    {% for category, message in messages %}
+                        <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 text-{{ 'green' if category == 'success' else 'red' }}-700 p-2 rounded">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        <form method="POST" action="/query">
+            <div class="mb-4">
+                <label class="block text-sm font-medium">Name</label>
+                <input type="text" name="name" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium">Email</label>
+                <input type="email" name="email" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium">Message</label>
+                <textarea name="message" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600" required></textarea>
+            </div>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Submit</button>
+        </form>
+
+        <h2 class="text-2xl font-semibold mt-8 mb-4">Respond to Pending Queries</h2>
+        {% if pending_queries %}
+            {% for query in pending_queries %}
+                <div class="mb-4 p-4 border rounded">
+                    <p><strong>Name:</strong> {{ query.name }}</p>
+                    <p><strong>Email:</strong> {{ query.email }}</p>
+                    <p><strong>Message:</strong> {{ query.message }}</p>
+                    <p><strong>Submitted:</strong> {{ query.date_submitted }}</p>
+                    <form method="POST" action="/respond_query">
+                        <input type="hidden" name="query_id" value="{{ query.id }}">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium">Response</label>
+                            <textarea name="response" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600" required></textarea>
+                        </div>
+                        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Submit Response</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No pending queries.</p>
+        {% endif %}
+
+        <h2 class="text-2xl font-semibold mt-8 mb-4">Query Status Distribution</h2>
+        {% if query_status_img %}
+            <img src="{{ query_status_img }}" alt="Query Status Distribution" class="w-full max-w-md mx-auto mt-4">
+        {% else %}
+            <p class="mt-4">Chart unavailable (matplotlib not installed).</p>
+        {% endif %}
+    </main>
+    <footer class="bg-blue-600 text-white p-4 mt-auto">
+        <div class="container mx-auto text-center">
+            <p>© 2025 IWB Recycling. All rights reserved.</p>
+            <p>Contact: info@iwb.co.ls | +266 1234 5678</p>
+        </div>
+    </footer>
+</body>
+</html>

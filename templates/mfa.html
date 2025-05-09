@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MFA - IWB Recycling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body class="min-h-screen flex flex-col" style="background-image: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center;">
+    <header class="bg-blue-600 bg-opacity-80 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-center items-center">
+            <nav>
+                <ul class="flex space-x-6 text-lg">
+                    <li><a href="/" class="hover:underline flex items-center"><i class="fas fa-home mr-2"></i> Home</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="flex-grow flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
+            <h2 class="text-3xl font-semibold mb-6 text-center">Enter MFA Code</h2>
+            <p class="mb-4 text-center">Your MFA code is: <strong>{{ mfa_code }}</strong></p>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="mb-4">
+                        {% for category, message in messages %}
+                            <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 text-{{ 'green' if category == 'success' else 'red' }}-700 p-2 rounded">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            <form method="POST" action="/mfa">
+                <div class="mb-6">
+                    <label class="block text-sm font-medium">MFA Code</label>
+                    <input type="text" name="mfa_code" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Verify</button>
+            </form>
+        </div>
+    </main>
+    <footer class="bg-blue-600 text-white p-4">
+        <div class="container mx-auto text-center">
+            <p>© 2025 IWB Recycling. All rights reserved.</p>
+            <p>Contact: info@iwb.co.ls | +266 1234 5678</p>
+        </div>
+    </footer>
+</body>
+</html>

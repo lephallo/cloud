@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IWB Recycling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body class="min-h-screen flex flex-col" style="background-image: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center;">
+    <!-- Header -->
+    <header class="bg-blue-600 bg-opacity-80 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-center items-center">
+            <nav>
+                <ul class="flex space-x-6 text-lg">
+                    {% if loggedin %}
+                        <li><a href="/" class="hover:underline flex items-center"><i class="fas fa-home mr-2"></i> Home</a></li>
+                        <li><a href="/products" class="hover:underline flex items-center"><i class="fas fa-box mr-2"></i> Products</a></li>
+                        <li><a href="/query" class="hover:underline flex items-center"><i class="fas fa-question-circle mr-2"></i> Query</a></li>
+                        {% if role == 'sales' %}
+                            <li><a href="/sales" class="hover:underline flex items-center"><i class="fas fa-shopping-cart mr-2"></i> Sales</a></li>
+                        {% endif %}
+                        {% if role in ['finance', 'investor'] %}
+                            <li><a href="/income" class="hover:underline flex items-center"><i class="fas fa-chart-line mr-2"></i> Income</a></li>
+                        {% endif %}
+                        {% if role == 'developer' %}
+                            <li><a href="/developer" class="hover:underline flex items-center"><i class="fas fa-code mr-2"></i> Developer</a></li>
+                        {% endif %}
+                        {% if role == 'partner' %}
+                            <li><a href="/partner" class="hover:underline flex items-center"><i class="fas fa-handshake mr-2"></i> Partner</a></li>
+                        {% endif %}
+                        <li><a href="/logout" class="hover:underline flex items-center"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a></li>
+                    {% else %}
+                        <li><a href="/register" class="bg-white text-blue-600 px-6 py-3 rounded-lg hover:bg-gray-200 flex items-center shadow-lg"><i class="fas fa-user-plus mr-2"></i> Register</a></li>
+                        <li><a href="/login" class="bg-white text-blue-600 px-6 py-3 rounded-lg hover:bg-gray-200 flex items-center shadow-lg"><i class="fas fa-sign-in-alt mr-2"></i> Login</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto p-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mt-4">
+                    {% for category, message in messages %}
+                        <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 text-{{ 'green' if category == 'success' else 'red' }}-700 p-2 rounded mb-4">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% if loggedin %}
+            <div class="bg-white rounded-lg shadow-lg p-6 mt-8">
+                <h2 class="text-3xl font-semibold mb-4">Welcome to IWB Recycling</h2>
+                <p class="mb-4">Explore our recycled computer parts and services.</p>
+                <!-- Category Dropdown -->
+                <div class="mb-4">
+                    <label for="category" class="block text-lg font-medium">Select Category:</label>
+                    <select id="category" onchange="filterProducts()" class="mt-1 p-2 border rounded w-full max-w-xs">
+                        <option value="all">All Categories</option>
+                        <option value="RAM">RAM</option>
+                        <option value="Hard Drive">Hard Drive</option>
+                        <option value="Motherboard">Motherboard</option>
+                    </select>
+                </div>
+                <!-- Products Display -->
+                <div id="products" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <!-- Products will be dynamically loaded via JavaScript -->
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center text-white text-2xl mt-20">
+                <h1 class="text-5xl font-bold mb-4 drop-shadow-lg">IWB Recycling</h1>
+                <p class="text-lg drop-shadow">Please register or login to access our services.</p>
+            </div>
+        {% endif %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-blue-600 text-white p-4">
+        <div class="container mx-auto text-center">
+            <p>© 2025 IWB Recycling. All rights reserved.</p>
+            <p>Contact: info@iwb.co.ls | +266 1234 5678</p>
+        </div>
+    </footer>
+
+    {% if loggedin %}
+    <script>
+        async function fetchProducts(category = 'all') {
+            const response = await fetch(`/products?category=${category}`);
+            const products = await response.json();
+            const productsDiv = document.getElementById('products');
+            productsDiv.innerHTML = '';
+            products.forEach(product => {
+                const productCard = `
+                    <div class="border p-4 rounded-lg shadow bg-white hover:shadow-xl transition">
+                        <img src="/static/images/${product.category}/${product.image}" alt="${product.name}" class="w-full h-48 object-cover rounded">
+                        <h3 class="text-xl font-semibold mt-2">${product.name}</h3>
+                        <p>Category: ${product.category}</p>
+                        <p>Price: M${product.price}</p>
+                        <button onclick="buyProduct(${product.id})" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Buy</button>
+                    </div>
+                `;
+                productsDiv.innerHTML += productCard;
+            });
+        }
+
+        function filterProducts() {
+            const category = document.getElementById('category').value;
+            fetchProducts(category);
+        }
+
+        async function buyProduct(productId) {
+            const response = await fetch('/buy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: productId })
+            });
+            const result = await response.json();
+            alert(result.message);
+            fetchProducts(document.getElementById('category').value);
+        }
+
+        // Load all products on page load
+        fetchProducts();
+    </script>
+    {% endif %}
+</body>
+</html>
